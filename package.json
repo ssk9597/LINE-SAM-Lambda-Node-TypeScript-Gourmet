@@ -16,5 +16,10 @@
   "bugs": {
     "url": "https://github.com/ssk9597/LINE-SAM-Lambda-Node-TypeScript-Gourmet/issues"
   },
-  "homepage": "https://github.com/ssk9597/LINE-SAM-Lambda-Node-TypeScript-Gourmet#readme"
+  "homepage": "https://github.com/ssk9597/LINE-SAM-Lambda-Node-TypeScript-Gourmet#readme",
+  "dependencies": {
+    "@line/bot-sdk": "^7.3.0",
+    "aws-sdk": "^2.954.0",
+    "axios": "^0.21.1"
+  }
 }
