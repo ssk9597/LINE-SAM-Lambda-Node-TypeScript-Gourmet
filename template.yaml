@@ -1,39 +1,60 @@
+# AWS CloudFormationテンプレートのバージョン
 AWSTemplateFormatVersion: '2010-09-09'
+# CloudFormationではなくSAMを使うと明記する
 Transform: AWS::Serverless-2016-10-31
+# CloudFormationのスタックの説明文（重要ではないので適当でOK）
 Description: >
-  sam-app
+  LINE Messaging API + Node.js + TypeScript + SAM(Lambda, API Gateway, DynamoDB, S3)で作った飲食店検索アプリです
 
-  Sample SAM Template for sam-app
-  
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
+  # Lambda関数のタイムアウト値（3秒に設定）
   Function:
     Timeout: 3
 
 Resources:
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+  # API Gateway
+  GourmetAPI:
+    # Typeを指定する（今回はAPI Gateway）
+    Type: AWS::Serverless::Api
     Properties:
-      CodeUri: hello-world/
-      Handler: app.lambdaHandler
+      # ステージ名（APIのURLの最後にこのステージ名が付与されます）
+      StageName: v1
+
+  # Lambda
+  GourmetFunction:
+    # Typeを指定する（今回はLambda）
+    Type: AWS::Serverless::Function
+    Properties:
+      # 関数が格納されているディレクトリ（今回はコンパイル後なので、distディレクトリを使用する）
+      CodeUri: api/dist
+      # ファイル名と関数名（今回はファイル名がindex.js、関数名がexports.handlerなので、index.handlerとなります）
+      Handler: index.handler
+      # どの言語とどのバージョンを使用するか
       Runtime: nodejs12.x
+      # ポリシーを付与する（今回はLambdaの権限とSSMの読み取り権限を付与）
+      Policies:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
+      # この関数をトリガーするイベントを指定します
       Events:
-        HelloWorld:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+        # API Gateway
+        GourmetAPI:
+          Type: Api
           Properties:
-            Path: /hello
-            Method: get
+            # どのAPIを使用するか（!Refは値の参照に使用します）
+            RestApiId: !Ref GourmetAPI
+            # URL
+            Path: /
+            # POSTメソッド
+            Method: post
 
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+  GourmetAPI:
+    Description: 'API Gateway'
+    Value: !Sub 'https://${GourmetAPI}.execute-api.${AWS::Region}.amazonaws.com/v1'
+  GourmetFunction:
+    Description: 'Lambda'
+    Value: !GetAtt GourmetFunction.Arn
+  GourmetFunctionIamRole:
+    Description: 'IAM Role'
+    Value: !GetAtt GourmetFunctionRole.Arn

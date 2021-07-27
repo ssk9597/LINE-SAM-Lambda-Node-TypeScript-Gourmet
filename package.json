@@ -1,0 +1,34 @@
+{
+  "name": "gourmet",
+  "version": "1.0.0",
+  "description": "This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "tsc": "tsc",
+    "build": "npm-run-all clean tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ssk9597/LINE-SAM-Lambda-Node-TypeScript-Gourmet.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ssk9597/LINE-SAM-Lambda-Node-TypeScript-Gourmet/issues"
+  },
+  "homepage": "https://github.com/ssk9597/LINE-SAM-Lambda-Node-TypeScript-Gourmet#readme",
+  "dependencies": {
+    "@line/bot-sdk": "^7.3.0",
+    "aws-sdk": "^2.954.0",
+    "axios": "^0.21.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.4.3",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "ts-node": "^10.1.0",
+    "typescript": "^4.3.5"
+  }
+}
