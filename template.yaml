@@ -20,6 +20,22 @@ Resources:
       # ステージ名（APIのURLの最後にこのステージ名が付与されます）
       StageName: v1
 
+  # DynamoDB
+  GourmetDynamoDB:
+    # Typeを指定する（今回はDynamoDB）
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      # テーブルの名前
+      TableName: Gourmets
+      # プライマリキーの設定（名前とプライマリキーのタイプ）
+      PrimaryKey:
+        Name: user_id
+        Type: String
+      # プロビジョニングされたキャパシティの設定（今回の要件では最小の1でOK）
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
   # Lambda
   GourmetFunction:
     # Typeを指定する（今回はLambda）
@@ -31,10 +47,11 @@ Resources:
       Handler: index.handler
       # どの言語とどのバージョンを使用するか
       Runtime: nodejs12.x
-      # ポリシーを付与する（今回はLambdaの権限とSSMの読み取り権限を付与）
+      # ポリシーを付与する（今回はLambdaの権限とSSMの読み取り権限とDynamoDBのフルアクセス権限を付与）
       Policies:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
       # この関数をトリガーするイベントを指定します
       Events:
         # API Gateway
