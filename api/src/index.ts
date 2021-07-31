@@ -9,6 +9,7 @@ import { errorTemplate } from './Common/TemplateMessage/Error';
 import { isCarTemplate } from './Common/TemplateMessage/IsCar';
 // Database
 import { putLocation } from './Common/Database/PutLocation';
+import { updateIsCar } from './Common/Database/UpdateIsCar';
 
 // SSM
 const ssm = new aws.SSM();
@@ -47,6 +48,7 @@ exports.handler = async (event: any, context: any) => {
     console.log('debug: ' + JSON.stringify(response));
     await actionLocationOrError(client, response);
     await actionIsCar(client, response);
+    await actionFlexMessage(client, response);
   } catch (err) {
     console.log(err);
   }
@@ -70,9 +72,7 @@ const actionLocationOrError = async (client: Client, event: WebhookEvent): Promi
     // Perform a conditional branch
     if (text === 'お店を探す') {
       await client.replyMessage(replyToken, yourLocation);
-    } else if (text === '車') {
-      return;
-    } else if (text === '徒歩') {
+    } else if (text === '車' || text === '徒歩') {
       return;
     } else {
       await client.replyMessage(replyToken, error);
@@ -82,7 +82,7 @@ const actionLocationOrError = async (client: Client, event: WebhookEvent): Promi
   }
 };
 
-const actionIsCar = async (client: Client, event: WebhookEvent) => {
+const actionIsCar = async (client: Client, event: WebhookEvent): Promise<void> => {
   try {
     // If the message is different from the target, returned
     if (event.type !== 'message' || event.message.type !== 'location') {
@@ -90,22 +90,42 @@ const actionIsCar = async (client: Client, event: WebhookEvent) => {
     }
 
     // Retrieve the required items from the event
-    const replyToken: string = event.replyToken;
-    const userId: string | undefined = event.source.userId;
+    const replyToken = event.replyToken;
+    const userId = event.source.userId;
     const latitude: string = String(event.message.latitude);
     const longitude: string = String(event.message.longitude);
 
-    try {
-      // Register userId, latitude, and longitude in DynamoDB
-      await putLocation(userId, latitude, longitude);
+    // Register userId, latitude, and longitude in DynamoDB
+    await putLocation(userId, latitude, longitude);
 
-      // modules
-      const isCar = await isCarTemplate();
+    // modules
+    const isCar = await isCarTemplate();
 
-      // Send a two-choice question
-      await client.replyMessage(replyToken, isCar);
-    } catch (err) {
-      console.log(err);
+    // Send a two-choice question
+    await client.replyMessage(replyToken, isCar);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const actionFlexMessage = async (client: Client, event: WebhookEvent) => {
+  try {
+    // If the message is different from the target, returned
+    if (event.type !== 'message' || event.message.type !== 'text') {
+      return;
+    }
+
+    // Retrieve the required items from the event
+    const replyToken = event.replyToken;
+    const userId = event.source.userId;
+    const isCar = event.message.text;
+
+    // Perform a conditional branch
+    if (isCar === '車' || isCar === '徒歩') {
+      // Register userId, isCar in DynamoDB
+      await updateIsCar(userId, isCar);
+    } else {
+      return;
     }
   } catch (err) {
     console.log(err);
