@@ -1,7 +1,7 @@
 // Load the package
 import { TextMessage } from '@line/bot-sdk';
 
-export const errorMessageTemplate = (): Promise<TextMessage> => {
+export const errorTemplate = (): Promise<TextMessage> => {
   return new Promise((resolve, reject) => {
     const params: TextMessage = {
       type: 'text',

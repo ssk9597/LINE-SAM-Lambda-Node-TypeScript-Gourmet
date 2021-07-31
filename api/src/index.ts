@@ -3,8 +3,11 @@ import { ClientConfig, Client, WebhookEvent } from '@line/bot-sdk';
 import aws from 'aws-sdk';
 
 // Load the module
+// TemplateMessage
 import { yourLocationTemplate } from './Common/TemplateMessage/YourLocation';
-import { errorMessageTemplate } from './Common/TemplateMessage/ErrorMessage';
+import { errorTemplate } from './Common/TemplateMessage/Error';
+import { isCarTemplate } from './Common/TemplateMessage/IsCar';
+// Database
 import { putLocation } from './Common/Database/PutLocation';
 
 // SSM
@@ -62,13 +65,17 @@ const actionLocationOrError = async (client: Client, event: WebhookEvent): Promi
 
     // modules
     const yourLocation = await yourLocationTemplate();
-    const errorMessage = await errorMessageTemplate();
+    const error = await errorTemplate();
 
     // Perform a conditional branch
     if (text === 'お店を探す') {
       await client.replyMessage(replyToken, yourLocation);
+    } else if (text === '車') {
+      return;
+    } else if (text === '徒歩') {
+      return;
     } else {
-      await client.replyMessage(replyToken, errorMessage);
+      await client.replyMessage(replyToken, error);
     }
   } catch (err) {
     console.log(err);
@@ -88,8 +95,18 @@ const actionIsCar = async (client: Client, event: WebhookEvent) => {
     const latitude: string = String(event.message.latitude);
     const longitude: string = String(event.message.longitude);
 
-    // Register userId, latitude, and longitude in DynamoDB
-    await putLocation(userId, latitude, longitude);
+    try {
+      // Register userId, latitude, and longitude in DynamoDB
+      await putLocation(userId, latitude, longitude);
+
+      // modules
+      const isCar = await isCarTemplate();
+
+      // Send a two-choice question
+      await client.replyMessage(replyToken, isCar);
+    } catch (err) {
+      console.log(err);
+    }
   } catch (err) {
     console.log(err);
   }
