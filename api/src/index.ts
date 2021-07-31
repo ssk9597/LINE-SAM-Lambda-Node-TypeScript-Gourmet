@@ -40,6 +40,7 @@ exports.handler = async (event: any, context: any) => {
 
   // action
   try {
+    console.log('debug: ' + JSON.stringify(response));
     await actionLocationOrError(client, response);
   } catch (err) {
     console.log(err);
