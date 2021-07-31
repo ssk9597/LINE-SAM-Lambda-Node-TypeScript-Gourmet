@@ -5,6 +5,7 @@ import aws from 'aws-sdk';
 // Load the module
 import { yourLocationTemplate } from './Common/TemplateMessage/YourLocation';
 import { errorMessageTemplate } from './Common/TemplateMessage/ErrorMessage';
+import { putLocation } from './Common/Database/PutLocation';
 
 // SSM
 const ssm = new aws.SSM();
@@ -42,6 +43,7 @@ exports.handler = async (event: any, context: any) => {
   try {
     console.log('debug: ' + JSON.stringify(response));
     await actionLocationOrError(client, response);
+    await actionIsCar(client, response);
   } catch (err) {
     console.log(err);
   }
@@ -68,6 +70,26 @@ const actionLocationOrError = async (client: Client, event: WebhookEvent): Promi
     } else {
       await client.replyMessage(replyToken, errorMessage);
     }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const actionIsCar = async (client: Client, event: WebhookEvent) => {
+  try {
+    // If the message is different from the target, returned
+    if (event.type !== 'message' || event.message.type !== 'location') {
+      return;
+    }
+
+    // Retrieve the required items from the event
+    const replyToken: string = event.replyToken;
+    const userId: string | undefined = event.source.userId;
+    const latitude: string = String(event.message.latitude);
+    const longitude: string = String(event.message.longitude);
+
+    // Register userId, latitude, and longitude in DynamoDB
+    await putLocation(userId, latitude, longitude);
   } catch (err) {
     console.log(err);
   }
