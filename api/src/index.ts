@@ -22,6 +22,10 @@ const LINE_GOURMET_CHANNEL_SECRET = {
   Name: 'LINE_GOURMET_CHANNEL_SECRET',
   WithDecryption: false,
 };
+const LINE_GOURMET_GOOGLE_MAP_API = {
+  Name: 'LINE_GOURMET_GOOGLE_MAP_API',
+  WithDecryption: false,
+};
 
 exports.handler = async (event: any, context: any) => {
   // Retrieving values in the SSM parameter store
@@ -29,9 +33,11 @@ exports.handler = async (event: any, context: any) => {
     .getParameter(LINE_GOURMET_CHANNEL_ACCESS_TOKEN)
     .promise();
   const CHANNEL_SECRET: any = await ssm.getParameter(LINE_GOURMET_CHANNEL_SECRET).promise();
+  const GOOGLE_MAP_API: any = await ssm.getParameter(LINE_GOURMET_GOOGLE_MAP_API).promise();
 
   const channelAccessToken: string = CHANNEL_ACCESS_TOKEN.Parameter.Value;
   const channelSecret: string = CHANNEL_SECRET.Parameter.Value;
+  const googleMapApi: string = GOOGLE_MAP_API.Parameter.Value;
 
   // Create a client using the SSM parameter store
   const clientConfig: ClientConfig = {
@@ -49,7 +55,7 @@ exports.handler = async (event: any, context: any) => {
     console.log('debug: ' + JSON.stringify(response));
     await actionLocationOrError(client, response);
     await actionIsCar(client, response);
-    await actionFlexMessage(client, response);
+    await actionFlexMessage(client, response, googleMapApi);
   } catch (err) {
     console.log(err);
   }
@@ -109,7 +115,7 @@ const actionIsCar = async (client: Client, event: WebhookEvent): Promise<void> =
   }
 };
 
-const actionFlexMessage = async (client: Client, event: WebhookEvent) => {
+const actionFlexMessage = async (client: Client, event: WebhookEvent, googleMapApi: string) => {
   try {
     // If the message is different from the target, returned
     if (event.type !== 'message' || event.message.type !== 'text') {
@@ -130,6 +136,7 @@ const actionFlexMessage = async (client: Client, event: WebhookEvent) => {
       console.log(data.Item.is_car.S);
       console.log(data.Item.latitude.N);
       console.log(data.Item.longitude.N);
+      console.log(googleMapApi);
     } else {
       return;
     }
