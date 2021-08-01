@@ -7,6 +7,7 @@ import aws from 'aws-sdk';
 import { yourLocationTemplate } from './Common/TemplateMessage/YourLocation';
 import { errorTemplate } from './Common/TemplateMessage/Error';
 import { isCarTemplate } from './Common/TemplateMessage/IsCar';
+import { getDatabaseInfo } from './Common/TemplateMessage/Gourmet/GetDatabaseInfo';
 // Database
 import { putLocation } from './Common/Database/PutLocation';
 import { updateIsCar } from './Common/Database/UpdateIsCar';
@@ -124,6 +125,11 @@ const actionFlexMessage = async (client: Client, event: WebhookEvent) => {
     if (isCar === '車' || isCar === '徒歩') {
       // Register userId, isCar in DynamoDB
       await updateIsCar(userId, isCar);
+      const data: any = await getDatabaseInfo(userId);
+      console.log(data.Item.user_id.S);
+      console.log(data.Item.is_car.S);
+      console.log(data.Item.latitude.N);
+      console.log(data.Item.longitude.N);
     } else {
       return;
     }
