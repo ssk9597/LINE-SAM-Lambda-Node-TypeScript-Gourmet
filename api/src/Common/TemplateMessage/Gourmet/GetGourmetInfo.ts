@@ -20,12 +20,44 @@ export const getGourmetInfo = async (user_id: string | undefined, googleMapApi: 
       radius = 800;
     }
 
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=restaurant&key=${googleMapApi}&language=ja`;
-    console.log(url);
+    let gourmetArray: any[] = [];
 
-    const gourmets: AxiosResponse<any> = await axios.get(url);
-    const gourmetData = gourmets.data.results;
-    console.log(gourmetData);
-    return gourmetData;
+    new Promise(async (resolve) => {
+      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=restaurant&key=${googleMapApi}&language=ja`;
+      const gourmets: AxiosResponse<any> = await axios.get(url);
+
+      const gourmetData = gourmets.data.results;
+      gourmetArray = gourmetArray.concat(gourmetData);
+
+      const pageToken = gourmets.data.next_page_token;
+      resolve(pageToken);
+    })
+      .then((value) => {
+        return new Promise((resolve) => {
+          setTimeout(async () => {
+            const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=restaurant&key=${googleMapApi}&language=ja&pagetoken=${value}`;
+            const gourmets = await axios.get(url);
+
+            const gourmetData = gourmets.data.results;
+            gourmetArray = gourmetArray.concat(gourmetData);
+
+            const pageToken = gourmets.data.next_page_token;
+            resolve(pageToken);
+          }, 2000);
+        });
+      })
+      .then((value) => {
+        setTimeout(async () => {
+          const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=restaurant&key=${googleMapApi}&language=ja&pagetoken=${value}`;
+          const gourmets = await axios.get(url);
+
+          const gourmetData = gourmets.data.results;
+          gourmetArray = gourmetArray.concat(gourmetData);
+        }, 2000);
+      });
+
+    setTimeout(() => {
+      resolve(gourmetArray);
+    }, 8000);
   });
 };
