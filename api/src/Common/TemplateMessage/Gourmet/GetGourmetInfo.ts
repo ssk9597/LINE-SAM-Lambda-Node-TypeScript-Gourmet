@@ -21,9 +21,9 @@ export const getGourmetInfo = async (user_id: string | undefined, googleMapApi: 
     }
 
     let gourmetArray: any[] = [];
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=restaurant&key=${googleMapApi}&language=ja`;
 
     new Promise(async (resolve) => {
-      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=restaurant&key=${googleMapApi}&language=ja`;
       const gourmets: AxiosResponse<any> = await axios.get(url);
 
       const gourmetData = gourmets.data.results;
@@ -35,8 +35,8 @@ export const getGourmetInfo = async (user_id: string | undefined, googleMapApi: 
       .then((value) => {
         return new Promise((resolve) => {
           setTimeout(async () => {
-            const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=restaurant&key=${googleMapApi}&language=ja&pagetoken=${value}`;
-            const gourmets = await axios.get(url);
+            const addTokenUrl = `${url}&pagetoken=${value}`;
+            const gourmets = await axios.get(addTokenUrl);
 
             const gourmetData = gourmets.data.results;
             gourmetArray = gourmetArray.concat(gourmetData);
@@ -48,8 +48,8 @@ export const getGourmetInfo = async (user_id: string | undefined, googleMapApi: 
       })
       .then((value) => {
         setTimeout(async () => {
-          const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=restaurant&key=${googleMapApi}&language=ja&pagetoken=${value}`;
-          const gourmets = await axios.get(url);
+          const addTokenUrl = `${url}&pagetoken=${value}`;
+          const gourmets = await axios.get(addTokenUrl);
 
           const gourmetData = gourmets.data.results;
           gourmetArray = gourmetArray.concat(gourmetData);
@@ -57,6 +57,7 @@ export const getGourmetInfo = async (user_id: string | undefined, googleMapApi: 
       });
 
     setTimeout(() => {
+      console.log(gourmetArray);
       resolve(gourmetArray);
     }, 8000);
   });
