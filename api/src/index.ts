@@ -9,6 +9,7 @@ import { errorTemplate } from './Common/TemplateMessage/Error';
 import { isCarTemplate } from './Common/TemplateMessage/IsCar';
 import { getDatabaseInfo } from './Common/TemplateMessage/Gourmet/GetDatabaseInfo';
 import { getGourmetInfo } from './Common/TemplateMessage/Gourmet/GetGourmetInfo';
+import { formatGourmetArray } from './Common/TemplateMessage/Gourmet/FormatGourmetArray';
 // Database
 import { putLocation } from './Common/Database/PutLocation';
 import { updateIsCar } from './Common/Database/UpdateIsCar';
@@ -132,7 +133,7 @@ const actionFlexMessage = async (client: Client, event: WebhookEvent, googleMapA
     if (isCar === '車' || isCar === '徒歩') {
       // Register userId, isCar in DynamoDB
       await updateIsCar(userId, isCar);
-      await getGourmetInfo(userId, googleMapApi);
+      await formatGourmetArray(userId, googleMapApi);
     } else {
       return;
     }
