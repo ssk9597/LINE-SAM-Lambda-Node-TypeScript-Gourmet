@@ -4,7 +4,10 @@ import { formatGourmetArray } from './FormatGourmetArray';
 // types
 import { GourmetData, GourmetDataArray } from './types/SortRatingGourmetArray.type';
 
-export const sortRatingGourmetArray = async (user_id: string | undefined, googleMapApi: string) => {
+export const sortRatingGourmetArray = async (
+  user_id: string | undefined,
+  googleMapApi: string
+): Promise<GourmetDataArray> => {
   return new Promise(async (resolve, reject) => {
     try {
       // modules formatGourmetArray
