@@ -8,9 +8,9 @@ export const getGourmetInfo = async (user_id: string | undefined, googleMapApi: 
   return new Promise(async (resolve, reject) => {
     // modules getDatabaseInfo
     const data: any = await getDatabaseInfo(user_id);
-    const isCar = data.Item.is_car.S;
-    const latitude = data.Item.latitude.N;
-    const longitude = data.Item.longitude.N;
+    const isCar = data.Item.is_car;
+    const latitude = data.Item.latitude;
+    const longitude = data.Item.longitude;
 
     // Bifurcate the radius value depending on whether you are driving or walking
     let radius = 0;
