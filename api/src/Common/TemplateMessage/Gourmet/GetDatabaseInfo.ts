@@ -1,21 +1,19 @@
 // Load the package
 import aws from 'aws-sdk';
 
-// DynamoDB
-const dynamodb = new aws.DynamoDB();
+// Create DynamoDB document client
+const docClient = new aws.DynamoDB.DocumentClient();
 
 export const getDatabaseInfo = async (userId: string | undefined) => {
   return new Promise((resolve, reject) => {
     const params = {
       TableName: 'Gourmets',
       Key: {
-        user_id: {
-          S: userId,
-        },
+        user_id: userId,
       },
     };
 
-    dynamodb.getItem(params, (err, data) => {
+    docClient.get(params, (err, data) => {
       if (err) {
         reject(err);
       } else {
