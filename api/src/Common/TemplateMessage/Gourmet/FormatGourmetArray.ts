@@ -4,7 +4,10 @@ import { getGourmetInfo } from './GetGourmetInfo';
 // types
 import { RequiredGourmetArray } from './types/FormatGourmetArray.type';
 
-export const formatGourmetArray = async (user_id: string | undefined, googleMapApi: string) => {
+export const formatGourmetArray = async (
+  user_id: string | undefined,
+  googleMapApi: string
+): Promise<RequiredGourmetArray> => {
   return new Promise(async (resolve, reject) => {
     // modules getGourmetInfo
     const gourmetInfo: any = await getGourmetInfo(user_id, googleMapApi);
@@ -27,7 +30,6 @@ export const formatGourmetArray = async (user_id: string | undefined, googleMapA
         };
       }
     );
-    console.log(requiredGourmetArray);
     resolve(requiredGourmetArray);
   });
 };

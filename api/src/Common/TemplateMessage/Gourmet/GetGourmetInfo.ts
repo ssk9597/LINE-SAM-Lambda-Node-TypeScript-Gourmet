@@ -57,7 +57,6 @@ export const getGourmetInfo = async (user_id: string | undefined, googleMapApi: 
       });
 
     setTimeout(() => {
-      console.log(gourmetArray);
       resolve(gourmetArray);
     }, 8000);
   });
