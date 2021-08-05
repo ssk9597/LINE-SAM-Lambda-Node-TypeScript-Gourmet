@@ -7,8 +7,7 @@ import aws from 'aws-sdk';
 import { yourLocationTemplate } from './Common/TemplateMessage/YourLocation';
 import { errorTemplate } from './Common/TemplateMessage/Error';
 import { isCarTemplate } from './Common/TemplateMessage/IsCar';
-import { formatGourmetArray } from './Common/TemplateMessage/Gourmet/FormatGourmetArray';
-import { sortRatingGourmetArray } from './Common/TemplateMessage/Gourmet/SortRatingGourmetArray';
+import { createFlexMessage } from './Common/TemplateMessage/Gourmet/CreateFlexMessage';
 // Database
 import { putLocation } from './Common/Database/PutLocation';
 import { updateIsCar } from './Common/Database/UpdateIsCar';
@@ -53,7 +52,6 @@ exports.handler = async (event: any, context: any) => {
 
   // action
   try {
-    console.log('debug: ' + JSON.stringify(response));
     await actionLocationOrError(client, response);
     await actionIsCar(client, response);
     await actionFlexMessage(client, response, googleMapApi);
@@ -132,7 +130,12 @@ const actionFlexMessage = async (client: Client, event: WebhookEvent, googleMapA
     if (isCar === '車' || isCar === '徒歩') {
       // Register userId, isCar in DynamoDB
       await updateIsCar(userId, isCar);
-      await sortRatingGourmetArray(userId, googleMapApi);
+      const flexMessage = await createFlexMessage(userId, googleMapApi);
+      if (flexMessage === undefined) {
+        return;
+      }
+      console.log(flexMessage);
+      await client.replyMessage(replyToken, flexMessage);
     } else {
       return;
     }
