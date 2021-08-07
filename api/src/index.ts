@@ -11,6 +11,7 @@ import { createFlexMessage } from './Common/TemplateMessage/Gourmet/CreateFlexMe
 // Database
 import { putLocation } from './Common/Database/PutLocation';
 import { updateIsCar } from './Common/Database/UpdateIsCar';
+import { putFavorite } from './Common/Database/PutFavorite';
 
 // SSM
 const ssm = new aws.SSM();
@@ -56,6 +57,7 @@ exports.handler = async (event: any, context: any) => {
     await actionLocationOrError(client, response);
     await actionIsCar(client, response);
     await actionFlexMessage(client, response, googleMapApi);
+    await actionPutFavoriteShop(response, googleMapApi);
   } catch (err) {
     console.log(err);
   }
@@ -143,4 +145,19 @@ const actionFlexMessage = async (client: Client, event: WebhookEvent, googleMapA
   } catch (err) {
     console.log(err);
   }
+};
+
+const actionPutFavoriteShop = async (event: WebhookEvent, googleMapApi: string) => {
+  // If the message is different from the target, returned
+  if (event.type !== 'postback') {
+    return;
+  }
+
+  // Retrieve the required items from the event
+  const data = event.postback.data;
+  const timestamp = event.timestamp;
+  const userId = event.source.userId;
+
+  // Register data, userId in DynamoDB
+  await putFavorite(data, timestamp, userId, googleMapApi);
 };
