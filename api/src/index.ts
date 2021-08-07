@@ -12,6 +12,7 @@ import { createFlexMessage } from './Common/TemplateMessage/Gourmet/CreateFlexMe
 import { putLocation } from './Common/Database/PutLocation';
 import { updateIsCar } from './Common/Database/UpdateIsCar';
 import { putFavorite } from './Common/Database/PutFavorite';
+import { queryFavorite } from './Common/Database/QueryFavorite';
 
 // SSM
 const ssm = new aws.SSM();
@@ -58,6 +59,7 @@ exports.handler = async (event: any, context: any) => {
     await actionIsCar(client, response);
     await actionFlexMessage(client, response, googleMapApi);
     await actionPutFavoriteShop(response, googleMapApi);
+    await actionTapFavoriteShop(client, response);
   } catch (err) {
     console.log(err);
   }
@@ -82,6 +84,8 @@ const actionLocationOrError = async (client: Client, event: WebhookEvent): Promi
     if (text === 'お店を探す') {
       await client.replyMessage(replyToken, yourLocation);
     } else if (text === '車' || text === '徒歩') {
+      return;
+    } else if (text === '行きつけのお店') {
       return;
     } else {
       await client.replyMessage(replyToken, error);
@@ -148,16 +152,39 @@ const actionFlexMessage = async (client: Client, event: WebhookEvent, googleMapA
 };
 
 const actionPutFavoriteShop = async (event: WebhookEvent, googleMapApi: string) => {
+  try {
+    // If the message is different from the target, returned
+    if (event.type !== 'postback') {
+      return;
+    }
+
+    // Retrieve the required items from the event
+    const data = event.postback.data;
+    const timestamp = event.timestamp;
+    const userId = event.source.userId;
+
+    // Register data, userId in DynamoDB
+    await putFavorite(data, timestamp, userId, googleMapApi);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const actionTapFavoriteShop = async (client: Client, event: WebhookEvent) => {
   // If the message is different from the target, returned
-  if (event.type !== 'postback') {
+  if (event.type !== 'message' || event.message.type !== 'text') {
     return;
   }
 
   // Retrieve the required items from the event
-  const data = event.postback.data;
-  const timestamp = event.timestamp;
+  const replyToken = event.replyToken;
   const userId = event.source.userId;
+  const text = event.message.text;
 
-  // Register data, userId in DynamoDB
-  await putFavorite(data, timestamp, userId, googleMapApi);
+  if (text === '行きつけのお店') {
+    console.log('OK');
+    await queryFavorite(userId);
+  } else {
+    return;
+  }
 };
