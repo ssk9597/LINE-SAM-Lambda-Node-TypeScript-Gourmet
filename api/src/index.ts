@@ -49,6 +49,7 @@ exports.handler = async (event: any, context: any) => {
   // body
   const body: any = JSON.parse(event.body);
   const response: WebhookEvent = body.events[0];
+  console.log(JSON.stringify(response));
 
   // action
   try {

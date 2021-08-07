@@ -92,6 +92,15 @@ export const createFlexMessage = async (
                   uri: storeRoutingURL,
                 },
               },
+              {
+                type: 'button',
+                action: {
+                  type: 'postback',
+                  label: '行きつけ',
+                  data: `lat=${gourmet.geometry_location_lat}&lng=${gourmet.geometry_location_lng}&name=${gourmet.name}&photo=${gourmet.photo_reference}&rating=${gourmet.rating}&vicinity=${gourmet.vicinity}`,
+                  displayText: '行きつけにする',
+                },
+              },
             ],
             spacing: 'sm',
           },

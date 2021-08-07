@@ -18,7 +18,6 @@ export const sortRatingGourmetArray = async (
 
       // narrow it down to 10 stores.
       const sortGourmetArray: GourmetDataArray = gourmetArray.slice(0, 10);
-      console.log(sortGourmetArray);
       resolve(sortGourmetArray);
     } catch (err) {
       reject(err);
