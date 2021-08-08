@@ -8,11 +8,11 @@ import { yourLocationTemplate } from './Common/TemplateMessage/YourLocation';
 import { errorTemplate } from './Common/TemplateMessage/Error';
 import { isCarTemplate } from './Common/TemplateMessage/IsCar';
 import { createFlexMessage } from './Common/TemplateMessage/Gourmet/CreateFlexMessage';
+import { makeFlexMessage } from './Common/TemplateMessage/Favorite/MakeFlexMessage';
 // Database
 import { putLocation } from './Common/Database/PutLocation';
 import { updateIsCar } from './Common/Database/UpdateIsCar';
 import { putFavorite } from './Common/Database/PutFavorite';
-import { queryFavorite } from './Common/Database/QueryFavorite';
 
 // SSM
 const ssm = new aws.SSM();
@@ -141,7 +141,6 @@ const actionFlexMessage = async (client: Client, event: WebhookEvent, googleMapA
       if (flexMessage === undefined) {
         return;
       }
-      console.log(flexMessage);
       await client.replyMessage(replyToken, flexMessage);
     } else {
       return;
@@ -182,8 +181,11 @@ const actionTapFavoriteShop = async (client: Client, event: WebhookEvent) => {
   const text = event.message.text;
 
   if (text === '行きつけのお店') {
-    console.log('OK');
-    await queryFavorite(userId);
+    const flexMessage = await makeFlexMessage(userId);
+    if (flexMessage === undefined) {
+      return;
+    }
+    await client.replyMessage(replyToken, flexMessage);
   } else {
     return;
   }
