@@ -65,6 +65,7 @@ exports.handler = async (event: any, context: any) => {
   }
 };
 
+// 位置情報もしくはエラーメッセージを送る
 const actionLocationOrError = async (client: Client, event: WebhookEvent): Promise<void> => {
   try {
     // If the message is different from the target, returned
@@ -95,6 +96,7 @@ const actionLocationOrError = async (client: Client, event: WebhookEvent): Promi
   }
 };
 
+// 移動手段の「車もしくは徒歩」かを尋ねるメッセージを送る
 const actionIsCar = async (client: Client, event: WebhookEvent): Promise<void> => {
   try {
     // If the message is different from the target, returned
@@ -121,6 +123,7 @@ const actionIsCar = async (client: Client, event: WebhookEvent): Promise<void> =
   }
 };
 
+// 上記の選択を経て、おすすめのお店をFlex Messageにして送る
 const actionFlexMessage = async (client: Client, event: WebhookEvent, googleMapApi: string) => {
   try {
     // If the message is different from the target, returned
@@ -150,6 +153,7 @@ const actionFlexMessage = async (client: Client, event: WebhookEvent, googleMapA
   }
 };
 
+// FlexMessageの「行きつけ」をタップしたらそのお店が登録される
 const actionPutFavoriteShop = async (event: WebhookEvent, googleMapApi: string) => {
   try {
     // If the message is different from the target, returned
@@ -169,6 +173,7 @@ const actionPutFavoriteShop = async (event: WebhookEvent, googleMapApi: string) 
   }
 };
 
+// リッチメニューの「行きつけ」をタップしたらメッセージが送られる
 const actionTapFavoriteShop = async (client: Client, event: WebhookEvent) => {
   // If the message is different from the target, returned
   if (event.type !== 'message' || event.message.type !== 'text') {
