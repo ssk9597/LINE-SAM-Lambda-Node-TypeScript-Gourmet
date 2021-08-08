@@ -4,7 +4,7 @@ import aws from 'aws-sdk';
 // Create DynamoDB document client
 const docClient = new aws.DynamoDB.DocumentClient();
 
-export const queryFavorite = async (userId: string | undefined) => {
+export const queryDatabaseInfo = async (userId: string | undefined) => {
   return new Promise((resolve, reject) => {
     const params = {
       TableName: 'Gourmets_Favorite',
@@ -17,7 +17,6 @@ export const queryFavorite = async (userId: string | undefined) => {
       if (err) {
         reject(err);
       } else {
-        console.log(data);
         resolve(data);
       }
     });
