@@ -82,7 +82,7 @@ export const makeFlexMessage = async (userId: string | undefined): Promise<FlexM
                 action: {
                   type: 'postback',
                   label: '行きつけを解除',
-                  data: `name=${item.name}&timestamp=${item.timestamp}`,
+                  data: `timestamp=${item.timestamp}`,
                   displayText: '行きつけを解除する',
                 },
               },

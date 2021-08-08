@@ -13,6 +13,7 @@ import { makeFlexMessage } from './Common/TemplateMessage/Favorite/MakeFlexMessa
 import { putLocation } from './Common/Database/PutLocation';
 import { updateIsCar } from './Common/Database/UpdateIsCar';
 import { putFavorite } from './Common/Database/PutFavorite';
+import { deleteFavorite } from './Common/Database/DeleteFavorite';
 
 // SSM
 const ssm = new aws.SSM();
@@ -51,7 +52,7 @@ exports.handler = async (event: any, context: any) => {
   // body
   const body: any = JSON.parse(event.body);
   const response: WebhookEvent = body.events[0];
-  console.log(JSON.stringify(response));
+  // console.log(JSON.stringify(response));
 
   // action
   try {
@@ -60,6 +61,7 @@ exports.handler = async (event: any, context: any) => {
     await actionFlexMessage(client, response, googleMapApi);
     await actionPutFavoriteShop(response, googleMapApi);
     await actionTapFavoriteShop(client, response);
+    await actionDeleteFavoriteShop(response);
   } catch (err) {
     console.log(err);
   }
@@ -166,8 +168,12 @@ const actionPutFavoriteShop = async (event: WebhookEvent, googleMapApi: string) 
     const timestamp = event.timestamp;
     const userId = event.source.userId;
 
-    // Register data, userId in DynamoDB
-    await putFavorite(data, timestamp, userId, googleMapApi);
+    // conditional branching
+    const isFavorite = data.indexOf('timestamp');
+    if (isFavorite === -1) {
+      // Register data, userId in DynamoDB
+      await putFavorite(data, timestamp, userId, googleMapApi);
+    }
   } catch (err) {
     console.log(err);
   }
@@ -193,5 +199,28 @@ const actionTapFavoriteShop = async (client: Client, event: WebhookEvent) => {
     await client.replyMessage(replyToken, flexMessage);
   } else {
     return;
+  }
+};
+
+// FlexMessageの「行きつけを解除」をタップしたらそのお店がDBから削除される
+const actionDeleteFavoriteShop = async (event: WebhookEvent) => {
+  try {
+    // If the message is different from the target, returned
+    if (event.type !== 'postback') {
+      return;
+    }
+
+    // Retrieve the required items from the event
+    const data = event.postback.data;
+    const userId = event.source.userId;
+
+    // conditional branching
+    const isFavorite = data.indexOf('timestamp');
+    if (isFavorite !== -1) {
+      // Delete Gourmets_Favorite
+      await deleteFavorite(data, userId);
+    }
+  } catch (err) {
+    console.log(err);
   }
 };

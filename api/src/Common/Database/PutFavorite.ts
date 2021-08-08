@@ -11,7 +11,7 @@ export const putFavorite = (
   googleMapApi: string
 ) => {
   return new Promise((resolve, reject) => {
-    //
+    // data
     const dataArray = data.split('&');
     const lat = dataArray[0].split('=')[1];
     const lng = dataArray[1].split('=')[1];
