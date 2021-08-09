@@ -1,6 +1,3 @@
-import { stringTo2048, string1To255 } from 'aws-sdk/clients/customerprofiles';
-import { ItemCollectionSizeEstimateRange } from 'aws-sdk/clients/dynamodb';
-
 export type Item = {
   user_id: string;
   photo_url: string;
