@@ -2,40 +2,25 @@
 import { FlexMessage, FlexCarousel, FlexBubble } from '@line/bot-sdk';
 
 // Load the module
-import { sortRatingGourmetArray } from './SortRatingGourmetArray';
+import { queryDatabaseInfo } from './QueryDatabaseInfo';
 
 // types
-import { Gourmet, RatingGourmetArray } from './types/CreateFlexMessage.type';
+import { Item, QueryItem } from './types/MakeFlexMessage.type';
 
-export const createFlexMessage = async (
-  user_id: string | undefined,
-  googleMapApi: string
-): Promise<FlexMessage | undefined> => {
+export const makeFlexMessage = async (userId: string | undefined): Promise<FlexMessage> => {
   return new Promise(async (resolve, reject) => {
     try {
-      // modules sortRatingGourmetArray
-      const ratingGourmetArray: RatingGourmetArray = await sortRatingGourmetArray(
-        user_id,
-        googleMapApi
-      );
+      // modules queryDatabaseInfo
+      const query: any = await queryDatabaseInfo(userId);
+      const queryItem: QueryItem = query.Items;
 
       // FlexMessage
-      const FlexMessageContents: FlexBubble[] = await ratingGourmetArray.map((gourmet: Gourmet) => {
-        // Create a URL for a store photo
-        const photoURL = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${gourmet.photo_reference}&key=${googleMapApi}`;
-
-        // Create a URL for the store details
-        const encodeURI = encodeURIComponent(`${gourmet.name} ${gourmet.vicinity}`);
-        const storeDetailsURL = `https://maps.google.co.jp/maps?q=${encodeURI}&z=15&iwloc=A`;
-
-        // Create a URL for store routing information
-        const storeRoutingURL = `https://www.google.com/maps/dir/?api=1&destination=${gourmet.geometry_location_lat},${gourmet.geometry_location_lng}`;
-
+      const FlexMessageContents: FlexBubble[] = await queryItem.map((item: Item) => {
         const flexBubble: FlexBubble = {
           type: 'bubble',
           hero: {
             type: 'image',
-            url: photoURL,
+            url: item.photo_url,
             size: 'full',
             aspectMode: 'cover',
             aspectRatio: '20:13',
@@ -46,7 +31,7 @@ export const createFlexMessage = async (
             contents: [
               {
                 type: 'text',
-                text: gourmet.name,
+                text: item.name,
                 size: 'xl',
                 weight: 'bold',
               },
@@ -62,7 +47,7 @@ export const createFlexMessage = async (
                   },
                   {
                     type: 'text',
-                    text: `${gourmet.rating}`,
+                    text: `${item.rating}`,
                     size: 'sm',
                     margin: 'md',
                     color: '#999999',
@@ -81,7 +66,7 @@ export const createFlexMessage = async (
                 action: {
                   type: 'uri',
                   label: '店舗詳細',
-                  uri: storeDetailsURL,
+                  uri: item.store_details_url,
                 },
               },
               {
@@ -89,16 +74,16 @@ export const createFlexMessage = async (
                 action: {
                   type: 'uri',
                   label: '店舗案内',
-                  uri: storeRoutingURL,
+                  uri: item.store_routing_url,
                 },
               },
               {
                 type: 'button',
                 action: {
                   type: 'postback',
-                  label: '行きつけ',
-                  data: `lat=${gourmet.geometry_location_lat}&lng=${gourmet.geometry_location_lng}&name=${gourmet.name}&photo=${gourmet.photo_reference}&rating=${gourmet.rating}&vicinity=${gourmet.vicinity}`,
-                  displayText: '行きつけにする',
+                  label: '行きつけを解除',
+                  data: `timestamp=${item.timestamp}`,
+                  displayText: '行きつけを解除する',
                 },
               },
             ],
@@ -116,7 +101,7 @@ export const createFlexMessage = async (
 
       const flexMessage: FlexMessage = {
         type: 'flex',
-        altText: '近隣の美味しいお店10店ご紹介',
+        altText: 'お気に入りのお店',
         contents: flexContainer,
       };
 
