@@ -1,5 +1,9 @@
 ## LINE-SAM-Lambda-Node-TypeScript-Gourmet
 
+### App
+
+![image](https://user-images.githubusercontent.com/70458379/128669548-9c812dd0-bf7d-4484-a381-3352cc26d4ce.png)
+
 ### Frontend
 
 ・LINE
